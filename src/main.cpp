@@ -21,7 +21,7 @@
 
 #include "main.h"
 #include "mainwindow.h"
-#if defined(Q_WS_X11) && defined(GLOBAL_AUTOTYPE)
+#if defined(Q_OS_LINUX) && defined(GLOBAL_AUTOTYPE)
 	#include "Application_X11.h"
 #endif
 
@@ -31,6 +31,7 @@
 
 //#include <QPluginLoader>
 #include <iostream>
+#include <QStyleFactory>
 
 using namespace std;
 
@@ -51,19 +52,21 @@ int main(int argc, char **argv)
 {
 	setlocale(LC_CTYPE, "");
 	
-#if defined(Q_WS_X11) && defined(AUTOTYPE)
+#if defined(Q_OS_LINUX) && defined(AUTOTYPE)
 	QApplication* app = new KeepassApplication(argc,argv);
 #else
 	QApplication* app = new QApplication(argc,argv);
 #endif
 	EventListener* eventListener = new EventListener();
 	app->installEventFilter(eventListener);
+
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
 	
 	QApplication::setQuitOnLastWindowClosed(false);
 	
 	AppDir = QApplication::applicationFilePath();
 	AppDir.truncate(AppDir.lastIndexOf("/"));
-#if defined(Q_WS_X11)
+#if defined(Q_OS_LINUX)
 	DataDir = AppDir+"/../share/keepassx";
 	if (!QFile::exists(DataDir) && QFile::exists(AppDir+"/share"))
 		DataDir = AppDir+"/share";
@@ -79,17 +82,17 @@ int main(int argc, char **argv)
 			HomeDir = QDir::homePath() + '/' + qenv;
 	}
 	HomeDir += "/keepassx";
-#elif defined(Q_WS_MAC)
+#elif defined(Q_OS_MAC)
 	HomeDir = QDir::homePath()+"/.keepassx";
 	DataDir = AppDir+"/../Resources/keepassx";
-#else //Q_WS_WIN
-	HomeDir = qtWindowsConfigPath(CSIDL_APPDATA);
-	if(!HomeDir.isEmpty() && QFile::exists(HomeDir))
-		HomeDir = QDir::fromNativeSeparators(HomeDir)+"/KeePassX";
-	else
-		HomeDir = QDir::homePath()+"/KeePassX";
-	
-	DataDir = AppDir+"/share";
+#else //Q_OS_WIN
+//	HomeDir = qtWindowsConfigPath(CSIDL_APPDATA);
+//	if(!HomeDir.isEmpty() && QFile::exists(HomeDir))
+//		HomeDir = QDir::fromNativeSeparators(HomeDir)+"/KeePassX";
+//	else
+//		HomeDir = QDir::homePath()+"/KeePassX";
+//
+//	DataDir = AppDir+"/share";
 #endif
 	DataDir = QDir::cleanPath(DataDir);
 	
@@ -117,7 +120,7 @@ int main(int argc, char **argv)
 	else
 		IniFilename=args.configLocation();
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_LINUX
 	{
 		QString OldHomeDir = QDir::homePath()+"/.keepassx";
 		if (args.configLocation().isEmpty() && QFile::exists(OldHomeDir+"/config") && !QFile::exists(HomeDir+"/config")) {
@@ -135,7 +138,7 @@ int main(int argc, char **argv)
 	
 	// PlugIns
 	/*
-#ifdef Q_WS_X11
+#ifdef Q_OS_LINUX
 	if(config->integrPlugin()!=KpxConfig::NoIntegr){
 		QString LibName="libkeepassx-";
 		if(config->integrPlugin()==KpxConfig::KDE)
@@ -183,14 +186,14 @@ int main(int argc, char **argv)
 	
 	DetailViewTemplate=config->detailViewTemplate();
 
-	loadImages();
+    loadImages();
 	KpxBookmarks::load();
 	initYarrow(); //init random number generator
 	SecString::generateSessionKey();
 	
 	installTranslator();
 
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
 	QApplication::processEvents();
 	if (args.file().isEmpty() && !eventListener->file().isEmpty()) {
 		args.setFile(eventListener->file());
@@ -198,7 +201,7 @@ int main(int argc, char **argv)
 #endif
 
 	KeepassMainWindow *mainWin = new KeepassMainWindow(args.file(), args.startMinimized(), args.startLocked());
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
 	eventListener->setMainWin(mainWin);
 #endif
 
@@ -297,7 +300,7 @@ bool EventListener::eventFilter(QObject*, QEvent* event){
 			EventOccurred = true;
 	}
 	
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MAC
 	if (event->type() == QEvent::FileOpen) {
 		QString filename = static_cast<QFileOpenEvent*>(event)->file();
 		if (pMainWindow) {

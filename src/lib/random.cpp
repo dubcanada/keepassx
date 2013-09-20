@@ -21,9 +21,9 @@
 #include "random.h"
 #include <unistd.h>
 
-#if defined(Q_WS_X11) || defined(Q_WS_MAC)
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 	#include <QFile>
-#elif defined(Q_WS_WIN)
+#elif defined(Q_OS_WIN)
 	#include <windows.h>
 	#include <wincrypt.h>
 	#include <QSysInfo>
@@ -57,7 +57,7 @@ quint32 randintRange(quint32 min, quint32 max){
 	return min + randint(max-min+1);
 }
 
-#if defined(Q_WS_X11) || defined(Q_WS_MAC)
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
 
 extern bool getNativeEntropy(quint8* buffer, int length) {
 	QFile dev_urandom("/dev/urandom");
@@ -66,7 +66,7 @@ extern bool getNativeEntropy(quint8* buffer, int length) {
 	return (dev_urandom.read((char*)buffer,length) == length);
 }
 
-#elif defined(Q_WS_WIN)
+#elif defined(Q_OS_WIN)
 
 extern bool getNativeEntropy(quint8* buffer, int length) {
 	HCRYPTPROV handle;
@@ -92,7 +92,7 @@ extern void initStdRand(){
 	stream << QCursor::pos();
 	stream << QDateTime::currentDateTime().toTime_t();
 	stream << QTime::currentTime().msec();
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN
 	stream << (quint32) GetCurrentProcessId();
 #else
 	stream << getpid();

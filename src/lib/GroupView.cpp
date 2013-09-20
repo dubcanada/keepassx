@@ -24,6 +24,8 @@
 
 #include <QBrush>
 #include <QHeaderView>
+#include <QDrag>
+#include <QMimeData>
 
 #define INSERT_AREA_WIDTH 4
 

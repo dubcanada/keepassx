@@ -1,6 +1,6 @@
 
 CONFIG = qt uic resources thread stl warn_on
-QT += xml
+QT += xml widgets
 
 *-g++ : QMAKE_CXXFLAGS_WARN_ON += -Wno-sign-compare
 
